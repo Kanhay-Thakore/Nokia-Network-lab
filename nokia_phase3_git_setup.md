@@ -1,5 +1,5 @@
 # Nokia Network Lab — Phase 3: Git Setup & GitHub Portfolio
-## Complete Notes | Git · GitHub · Source Control · Windows-to-Ubuntu File Transfer
+## Complete Notes | Git · GitHub · Source Control · Windows-to-Ubuntu File Transfer · VS Code Setup
 > Mapped to Nokia Junior Developer JD Requirements
 > Status: ✅ COMPLETE (Git Setup & Repository Initialization)
 
@@ -15,12 +15,15 @@ This section directly addresses the Nokia JD requirement: *"Experience with Git 
 
 | Component | Details | Purpose |
 |---|---|---|
-| Ubuntu Server VM | Ubuntu 26.04 LTS at 192.168.6.129 | Git repository host, script development environment |
+| Ubuntu Server VM | Ubuntu 26.04 LTS at 192.168.6.129 | Git repository host, script execution environment |
 | Kali Linux VM | kali-linux-2025.2 at 192.168.6.130 | Secondary analyst machine |
-| Windows Desktop | Host laptop | SSH client, source of MD files transferred via scp |
+| Windows Desktop | Host laptop (C:\Users\thako) | VS Code development, Git push to GitHub |
 | GitHub Repository | https://github.com/Kanhay-Thakore/Nokia-Network-lab | Remote portfolio repository (public) |
-| Git Version | 2.53.0 | Installed on Ubuntu during Phase 0 |
-| Python Version | 3.14.4 | Confirmed ready on Ubuntu for Phase 3 scripts |
+| Git Version (Ubuntu) | 2.53.0 | Installed on Ubuntu during Phase 0 |
+| Git Version (Windows) | 2.54.0 | Installed on Windows for VS Code workflow |
+| Python Version (Ubuntu) | 3.14.4 | Script execution environment on Ubuntu |
+| Python Version (Windows) | 3.12.10 | Local syntax checking and IntelliSense in VS Code |
+| VS Code | Latest | Script development IDE on Windows |
 | Network | VMnet8 NAT | Both VMs on same subnet |
 
 ---
@@ -33,13 +36,275 @@ Git is the industry-standard version control system used by virtually every prof
 
 ## Where Python Scripts Are Written and Run
 
-Before touching Git, it is important to establish the correct development workflow for this lab. The scripts in Phase 3 need to read pcap files, send HTTP requests to the Ubuntu server, and analyze packet-level data — all of which lives on the Linux VMs. Python 3.14.4 is already installed on Ubuntu. The correct workflow is:
+Before touching Git, it is important to establish the correct development workflow for this lab. The scripts in Phase 3 need to read pcap files, send HTTP requests to the Ubuntu server, and analyze packet-level data — all of which lives on the Linux VMs. Python 3.14.4 is already installed on Ubuntu for execution. The correct professional workflow is:
 
 ```
-PowerShell (SSH into Ubuntu) → write script with nano → run script on Ubuntu → git push to GitHub
+VS Code on Windows (write + syntax check)
+        ↓
+git push to GitHub
+        ↓
+Ubuntu VM — git pull
+        ↓
+Run script on Ubuntu against the lab
+        ↓
+Capture results and screenshots for portfolio
 ```
 
-This mirrors the professional workflow Nokia engineers use daily — SSH into a remote Linux server, write and run scripts in the terminal, commit working code to Git. There is no GUI, no clicking, just terminal. Developing directly on Ubuntu means zero file-transfer friction between writing and running, and it is the same environment where the scripts will be executed against real network traffic.
+This mirrors the professional workflow Nokia engineers use daily — develop code in a proper IDE, version-control it through Git, deploy it onto a Linux server, and execute it against real infrastructure. Writing scripts in `nano` directly on the server is avoided because it has no syntax highlighting, no error detection, no autocomplete, and no debugger — making every typo and indentation error invisible until the script crashes at runtime.
+
+**Why Git and not SCP:** SCP transfers the file to Ubuntu but leaves no version history, no commit messages, no portfolio evidence, and no rollback capability. If a script breaks after 10 changes, SCP gives you no way to identify which change caused the problem. Git gives you a permanent record of every change, visible to Nokia interviewers on your public GitHub portfolio. The extra cost is exactly 4 commands — `git add .`, `git commit -m "message"`, `git push` on Windows, and `git pull` on Ubuntu.
+
+---
+
+## Windows Development Environment Setup
+
+This section covers the complete setup of the Windows development environment — installing Git, cloning the repository, setting up VS Code, and installing Python — so that script development follows a professional IDE-to-GitHub-to-Linux workflow rather than writing code in a terminal text editor.
+
+### Step W1 — Install Git on Windows
+
+Git is the version control software. On Ubuntu it was already installed during Phase 0. On Windows it needs to be installed separately so the VS Code terminal can push to GitHub directly.
+
+Download from:
+```
+https://git-scm.com/download/win
+```
+
+Run the installer with all default options — click Next through every screen. After installation, **fully close and reopen PowerShell** so the new PATH entry takes effect.
+
+Verify installation:
+
+```powershell
+git --version
+```
+
+**Expected output:**
+```
+git version 2.54.0.windows.1
+```
+
+**Why close and reopen PowerShell:** When an installer adds a new entry to the Windows PATH, running programs don't see the change until they restart. PowerShell reads the PATH only when it launches — an already-open window holds the old PATH in memory and will not find Git until it is closed and reopened.
+
+---
+
+### Step W2 — Clone the Repository onto Windows
+
+Navigate to your home folder first:
+
+```powershell
+cd ~
+```
+
+`~` on Windows PowerShell means your user home directory — `C:\Users\thako`. Always clone projects here, never in system folders like `C:\Windows\system32`.
+
+Clone the repository:
+
+```powershell
+git clone https://github.com/Kanhay-Thakore/Nokia-Network-lab
+```
+
+| Part | Explanation |
+|---|---|
+| `git clone` | Downloads a complete copy of the remote repository — every file, every folder, every commit in the history — onto your local machine |
+| `https://github.com/Kanhay-Thakore/Nokia-Network-lab` | The URL of your GitHub repository |
+
+**What clone does that SCP does not:** `git clone` doesn't just copy files — it copies the entire Git history and permanently links this local folder to GitHub as its remote origin. From this moment, every `git push` from this folder goes directly to your GitHub repository. SCP has no such link.
+
+**Expected output:**
+```
+Cloning into 'Nokia-Network-lab'...
+remote: Enumerating objects: 4, done.
+remote: Total 4 (delta 0), reused 4 (delta 0), pack-reused 0
+Receiving objects: 100% (4/4), 18.24 KiB | 18.24 MiB/s, done.
+```
+
+A new folder `Nokia-Network-lab` is now at `C:\Users\thako\Nokia-Network-lab` — permanently linked to GitHub.
+
+---
+
+### Step W3 — Open the Project in VS Code
+
+Navigate into the cloned folder:
+
+```powershell
+cd Nokia-Network-lab
+```
+
+Open VS Code with this folder as the project root:
+
+```powershell
+code .
+```
+
+| Part | Explanation |
+|---|---|
+| `code` | The VS Code command-line launcher — installed automatically when VS Code is installed |
+| `.` | "Open VS Code using the current directory as the project root" — VS Code loads with your entire Nokia-Network-lab folder visible in the left sidebar |
+
+VS Code opens showing the project folder structure in the Explorer panel on the left — `scripts/`, `nokia_phase1_complete.md`, `nokia_phase2_complete.md`. This is the project view Nokia developers work in daily.
+
+---
+
+### Step W4 — Install VS Code Extensions
+
+Two extensions are required for Python development in VS Code. Open the Extensions panel:
+
+```
+Ctrl + Shift + X
+```
+
+Install these two, in order:
+
+| Extension | Publisher | Downloads | Purpose |
+|---|---|---|---|
+| Python | Microsoft | 216M+ | Syntax highlighting, IntelliSense, error detection for .py files |
+| Pylance | Microsoft | 183M+ | Language server — real-time type checking, accurate autocomplete, function signatures |
+
+**Python extension** gives VS Code the ability to understand Python syntax — code turns colourful, errors get underlined in red, and the file is recognised as Python rather than plain text.
+
+**Pylance extension** is the intelligence layer on top — it analyses your code in real time as you type, tells you what arguments a function expects, catches type mismatches before you run the script, and provides far more accurate autocomplete than the base Python extension alone.
+
+Search each by name, click the result published by Microsoft, click Install.
+
+---
+
+### Step W5 — Install Python 3.12 on Windows
+
+VS Code needs a local Python installation for IntelliSense and syntax checking. The scripts will execute on Ubuntu (Python 3.14.4), but VS Code needs a local interpreter to provide real-time error detection while writing.
+
+Download Python 3.12.x from:
+```
+https://www.python.org/downloads/release/python-3128/
+```
+
+Scroll to the Files section → click **Windows installer (64-bit)**.
+
+**CRITICAL — on the first installer screen, check this box before clicking anything:**
+```
+☑ Add python.exe to PATH
+```
+
+This checkbox adds Python to the Windows PATH automatically. If missed, Python installs correctly but Windows cannot find it by name — requiring manual PATH repair.
+
+Click **Install Now**.
+
+**Why Python 3.12 and not 3.14:** Python 3.14 is the latest version installed on Ubuntu but is too new for stable library support on Windows. Python 3.12 is the current stable LTS-equivalent — every library used in Phase 3 (`requests`, `scapy`, `dpkt`) is fully tested and supported on 3.12.
+
+---
+
+### Step W6 — Fix Windows App Execution Aliases
+
+Windows ships with fake "python" shortcuts in the Microsoft Store that intercept the `python` command and redirect to the Store instead of launching real Python. These must be disabled.
+
+Navigate to:
+```
+Windows Settings → Apps → Advanced app settings → App execution aliases
+```
+
+Or search: **App execution aliases** in the Start menu.
+
+Find these two entries and toggle both **OFF**:
+
+| Entry | Toggle |
+|---|---|
+| App Installer — python.exe | OFF |
+| App Installer — python3.exe | OFF |
+
+Without disabling these, typing `python` in any terminal will open the Microsoft Store regardless of whether Python 3.12 is installed.
+
+---
+
+### Step W7 — Fix Python PATH Permanently
+
+If `python --version` still fails after installation, add Python to the PATH manually through Windows System Properties:
+
+Press **Windows + R** → type `sysdm.cpl` → Enter → **Advanced** tab → **Environment Variables**.
+
+In the **User variables** section, double-click **Path** → click **New** twice and add:
+
+```
+C:\Users\thako\AppData\Local\Programs\Python\Python312
+C:\Users\thako\AppData\Local\Programs\Python\Python312\Scripts
+```
+
+Click OK → OK → OK. Then **fully close and reopen VS Code**.
+
+**Why fully closing VS Code is required:** VS Code reads the PATH only at launch. Any terminal opened inside VS Code inherits the PATH that existed when VS Code started. Adding Python to the PATH while VS Code is running has no effect on existing terminals — a full restart is required.
+
+**Verify Python is working:**
+
+```powershell
+python --version
+```
+
+**Expected output:**
+```
+Python 3.12.10
+```
+
+---
+
+### Step W8 — Install the requests Library on Windows
+
+The `requests` library is used in Script 1 and must be installed into Windows Python 3.12 for VS Code's IntelliSense to recognise it without red underlines:
+
+```powershell
+python -m pip install requests
+```
+
+| Part | Explanation |
+|---|---|
+| `python` | Calls Python 3.12 on Windows |
+| `-m pip` | Runs pip (Python's package manager) as a module — this guarantees pip installs into the exact same Python that the `python` command uses, avoiding environment mismatch |
+| `install requests` | Downloads and installs the requests library from PyPI (Python Package Index) |
+
+**Verify the library installed correctly:**
+
+```powershell
+python -c "import requests; print(requests.__version__)"
+```
+
+**Expected output:**
+```
+2.33.1
+```
+
+`-c` means "run this short Python code directly from the command line." This one-liner imports requests and prints its version — if a version number appears, the library is fully accessible.
+
+---
+
+### Step W9 — Create the Scripts Folder and First Script File in VS Code
+
+In VS Code's Explorer panel (left sidebar), right-click on `NOKIA-NETWORK-LAB` → **New Folder** → name it:
+
+```
+scripts
+```
+
+Then right-click the `scripts` folder → **New File** → name it:
+
+```
+http_traffic_generator.py
+```
+
+**Why creating the folder in VS Code and not on Ubuntu first:** Git does not track empty folders — they are completely invisible to Git. The `scripts/`, `pcaps/`, and `results/` folders created on Ubuntu during Phase 0 were never pushed to GitHub because they were empty. When the Windows clone pulled from GitHub, those folders did not come down. Creating the `scripts` folder in VS Code and immediately putting a file inside it means Git will track it the moment we push.
+
+**No conflict with Ubuntu's empty scripts folder:** Git only conflicts when two sides have different content in the same file. An empty folder on Ubuntu versus a new script file in the same folder is not a conflict — Git simply adds the new file to the empty folder when Ubuntu pulls.
+
+---
+
+### Complete Windows Development Environment — Summary
+
+| Component | Version | Status | Purpose |
+|---|---|---|---|
+| Git for Windows | 2.54.0 | ✅ Installed | Push scripts to GitHub from VS Code terminal |
+| Repo cloned | Nokia-Network-lab | ✅ Linked to GitHub | `C:\Users\thako\Nokia-Network-lab` permanently linked to remote origin |
+| VS Code | Latest | ✅ Open with project | Script development IDE |
+| Python extension | Microsoft | ✅ Installed | Syntax highlighting, .py file recognition |
+| Pylance extension | Microsoft | ✅ Installed | Real-time type checking, IntelliSense |
+| Python 3.12.10 | 3.12.10 | ✅ Installed | Local interpreter for VS Code |
+| requests library | 2.33.1 | ✅ Installed | HTTP library for Script 1 |
+| App execution aliases | python.exe, python3.exe | ✅ Disabled | Prevents Microsoft Store from hijacking python command |
+| PATH | System Environment Variables | ✅ Fixed permanently | Python 3.12 accessible from any terminal |
 
 ---
 
@@ -432,13 +697,20 @@ Those folders will appear on GitHub automatically the moment a file is placed in
 
 From this point forward, every time a script is written or modified, the workflow to save it to GitHub is always the same three commands:
 
-```bash
+**On Windows (VS Code terminal) — push the script:**
+```powershell
 git add .
 git commit -m "Describe what you changed"
 git push
 ```
 
-That is the complete professional Git workflow. Three commands. Every time.
+**On Ubuntu — pull the script and run it:**
+```bash
+git pull
+python3 scripts/http_traffic_generator.py
+```
+
+That is the complete professional Git workflow. Four commands total across two machines. Every time.
 
 **Good commit message examples for Phase 3:**
 - `"Add Script 1 HTTP traffic generator"`
@@ -452,7 +724,10 @@ That is the complete professional Git workflow. Three commands. Every time.
 ## Key Concepts Summary
 
 ### Git vs GitHub
-Git is the version control software installed on Ubuntu — it tracks changes locally. GitHub is the cloud hosting service where your repository lives online — it stores your history and makes it accessible to collaborators and interviewers. Git and GitHub are separate things. You use Git commands on Ubuntu to push your local history up to GitHub.
+Git is the version control software — installed on both Ubuntu and Windows. GitHub is the cloud hosting service where your repository lives online — it stores your history and makes it accessible to collaborators and interviewers. Git and GitHub are separate things. You use Git commands to push your local history up to GitHub from either machine.
+
+### VS Code as the Development Environment
+VS Code is not just a text editor — it is a full IDE (Integrated Development Environment) with syntax highlighting, real-time error detection, Git integration, and a built-in terminal. The Git integration means VS Code's terminal already knows where the repository is and who it belongs to. Opening the project with `code .` from inside the cloned folder links VS Code directly to that repository — no additional configuration needed.
 
 ### Commits
 A commit is a permanent snapshot of your project at a specific moment in time. Every commit has a unique ID, an author name and email, a timestamp, a message describing what changed, and a record of exactly which lines were added or removed. The commit history is the complete story of how your project evolved.
@@ -461,37 +736,46 @@ A commit is a permanent snapshot of your project at a specific moment in time. E
 A branch is an independent timeline of commits. The `main` branch is the primary timeline. In professional teams, developers create separate branches for new features or experiments, work on them without affecting `main`, then merge them in when the work is complete. For this lab, working directly on `main` is appropriate.
 
 ### Remote vs Local
-Your local repository is the `.git` folder on Ubuntu — it stores everything on disk. Your remote repository is GitHub — it stores the same history in the cloud. `git push` uploads your local commits to the remote. `git pull` downloads changes from the remote to your local machine. Both must be kept in sync for collaborative work.
+Your local repositories are the `.git` folders on Ubuntu and in `C:\Users\thako\Nokia-Network-lab` on Windows — they each store the full history on disk. Your remote repository is GitHub — it stores the same history in the cloud. `git push` uploads local commits to the remote. `git pull` downloads changes from the remote to your local machine. Both machines push and pull to the same GitHub remote — this is how teams collaborate.
 
-### The Three-Step Ritual
+### The Complete Workflow
 ```
-git add .           → Stage: select what goes in the next save point
-git commit -m "..."  → Commit: create the save point with a label
-git push            → Push: upload the save point to GitHub
+VS Code (Windows)     → Write script
+git add .             → Stage changes
+git commit -m "..."   → Create save point
+git push              → Upload to GitHub
+
+Ubuntu VM
+git pull              → Download from GitHub
+python3 script.py     → Execute in lab
 ```
 
 ---
 
 ## Commands Quick Reference — Git Setup
 
-| Command | What It Does |
-|---|---|
-| `python3 --version` | Confirm Python 3 is installed and check version |
-| `git --version` | Confirm Git is installed and check version |
-| `git config --global user.name "Name"` | Set Git author name for all repositories on this machine |
-| `git config --global user.email "email"` | Set Git author email for all repositories on this machine |
-| `git config --list` | Show all current Git configuration settings |
-| `mkdir -p ~/Nokia-Network-lab/scripts` | Create project folder and scripts subfolder |
-| `git init` | Initialize current folder as a Git repository |
-| `git branch -m main` | Rename current branch from master to main |
-| `git config --global init.defaultBranch main` | Set main as default branch for all future repos |
-| `git status` | Show current state of the repository |
-| `git remote add origin URL` | Link local repository to GitHub remote |
-| `git remote -v` | Show all remote connections with their URLs |
-| `git add .` | Stage all files in current folder for next commit |
-| `git commit -m "message"` | Create a save point with a description |
-| `git push -u origin main` | Upload commits to GitHub and set upstream tracking |
-| `git push` | Upload commits to GitHub (after upstream is set) |
+| Command | Where | What It Does |
+|---|---|---|
+| `python3 --version` | Ubuntu | Confirm Python 3 is installed and check version |
+| `git --version` | Both | Confirm Git is installed and check version |
+| `git config --global user.name "Name"` | Ubuntu | Set Git author name for all repositories on this machine |
+| `git config --global user.email "email"` | Ubuntu | Set Git author email for all repositories on this machine |
+| `git config --list` | Both | Show all current Git configuration settings |
+| `mkdir -p ~/Nokia-Network-lab/scripts` | Ubuntu | Create project folder and scripts subfolder |
+| `git init` | Ubuntu | Initialize current folder as a Git repository |
+| `git branch -m main` | Ubuntu | Rename current branch from master to main |
+| `git config --global init.defaultBranch main` | Both | Set main as default branch for all future repos |
+| `git status` | Both | Show current state of the repository |
+| `git remote add origin URL` | Ubuntu | Link local repository to GitHub remote |
+| `git remote -v` | Both | Show all remote connections with their URLs |
+| `git add .` | Both | Stage all files in current folder for next commit |
+| `git commit -m "message"` | Both | Create a save point with a description |
+| `git push -u origin main` | Both | Upload commits to GitHub and set upstream tracking |
+| `git push` | Both | Upload commits to GitHub (after upstream is set) |
+| `git pull` | Ubuntu | Download latest commits from GitHub |
+| `git clone URL` | Windows | Download a full copy of a GitHub repository |
+| `code .` | Windows | Open VS Code with current folder as project root |
+| `python -m pip install requests` | Windows | Install Python library into Windows Python 3.12 |
 
 ---
 
@@ -509,7 +793,10 @@ Always use quotes around the Windows path if it contains spaces. The colon after
 ## Interview Talking Points — Git and Source Control
 
 **If asked about Git experience:**
-*"I set up a Git repository on an Ubuntu Server VM, configured my identity, linked it to a remote GitHub repository, and established the complete push workflow. I understand the stage-commit-push cycle and have used it to version-control lab notes and Python automation scripts across multiple phases of a network testing project."*
+*"I set up a complete Git workflow across two environments — Ubuntu Server VM and a Windows development machine. On Ubuntu I initialized the repository, configured identity, and linked it to GitHub. On Windows I installed Git, cloned the repository into VS Code, and established the push workflow so scripts written in VS Code are pushed to GitHub and pulled onto Ubuntu for execution. I understand the stage-commit-push cycle and have used it to version-control lab notes and Python automation scripts across multiple phases of a network testing project."*
+
+**If asked about your development workflow:**
+*"I write Python scripts locally in VS Code on Windows, which gives me full syntax highlighting, IntelliSense, and real-time error detection through the Python and Pylance extensions. When the script is ready I push it to GitHub with a descriptive commit message, then SSH into my Ubuntu VM, pull the latest version, and execute it against the lab environment. This is the same workflow professional Nokia developers use — develop locally in an IDE, version-control through Git, deploy and execute on Linux."*
 
 **If asked about source control in a team environment:**
 *"Git gives a team a shared history of every change ever made to a codebase — who changed what, when, and why. In a Nokia testing context, that means if a new test script breaks the regression suite, you can identify exactly which commit introduced the problem and roll back to the last known good state. I understand the distinction between local repositories and remote repositories, and the workflow of committing locally then pushing to a shared remote."*
@@ -520,6 +807,7 @@ Always use quotes around the Windows path if it contains spaces. The colon after
 ---
 
 *Git Setup Completed: May 4, 2026*
+*Windows Development Environment Setup Completed: May 14, 2026*
 *Repository: https://github.com/Kanhay-Thakore/Nokia-Network-lab*
 *Lab: Ubuntu 192.168.6.129 | Kali 192.168.6.130 | VMnet8 NAT*
 *Next: Phase 3 — Python Automation Scripts (5 scripts)*
